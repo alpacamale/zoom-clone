@@ -1,6 +1,7 @@
 import http from "http";
-import WebSocket from "ws";
+// import WebSocket from "ws";
 import express from "express";
+import SocketIo from "socket.io";
 
 const port = 3000;
 
@@ -12,34 +13,45 @@ app.get("/", (req, res) => res.render("home"));
 app.use((req, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:${port}`);
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-const sockets = [];
+const httpServer = http.createServer(app);
+const wsServer = SocketIo(httpServer);
 
-function onSocketClose() {
-  console.log("Disconnected from Browser ❌");
-}
-
-function onSocketMessage(msg) {
-  console.log(msg.toString("utf-8"));
-  const message = JSON.parse(msg);
-  switch (message.type) {
-    case "new_message":
-      sockets.forEach((s) => s.send(`${this.nickname}: ${message.payload}`));
-      break;
-    case "nickname":
-      this["nickname"] = message.payload;
-      break;
-  }
-}
-
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket["nickname"] = "Annonymouse";
-  console.log("Connected to Browser ✅");
-  socket.on("close", onSocketClose);
-  socket.on("message", onSocketMessage);
-  socket.send("hello!!");
+wsServer.on("connection", (socket) => {
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 1000);
+  });
 });
 
-server.listen(port, handleListen);
+// const wss = new WebSocket.Server({ server });
+// const sockets = [];
+
+// function onSocketClose() {
+//   console.log("Disconnected from Browser ❌");
+// }
+
+// function onSocketMessage(msg) {
+//   console.log(msg.toString("utf-8"));
+//   const message = JSON.parse(msg);
+//   switch (message.type) {
+//     case "new_message":
+//       sockets.forEach((s) => s.send(`${this.nickname}: ${message.payload}`));
+//       break;
+//     case "nickname":
+//       this["nickname"] = message.payload;
+//       break;
+//   }
+// }
+
+// wss.on("connection", (socket) => {
+//   sockets.push(socket);
+//   socket["nickname"] = "Annonymouse";
+//   console.log("Connected to Browser ✅");
+//   socket.on("close", onSocketClose);
+//   socket.on("message", onSocketMessage);
+//   socket.send("hello!!");
+// });
+
+httpServer.listen(port, handleListen);
