@@ -20,6 +20,11 @@ html(lang="en")
           button#camera Turn Camera Off
           select#cameras
         div#peerStream
+        div#dataChannel 
+          ul#messageList
+          form#messageForm
+            input#messageInput(placeholder="Write a message...", required, type="text")
+            button Send
           
     script(src="/socket.io/socket.io.js")
     script(src="/public/js/app.js")
